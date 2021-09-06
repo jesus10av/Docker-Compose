@@ -1,0 +1,57 @@
+version: '3.7'
+services:
+  config-server:
+    image: eivan123/config-server:v1
+    ports:
+      - "8888:8888"
+    restart: always
+    networks:
+      - wifihub
+  servicio-eureka-server:
+    image: eivan123/servicio-eureka-server:v1
+    ports:
+      - "8761:8761"
+    restart: always
+    networks:
+      - wifihub
+  microservicios-mysql8:
+    image: mysql:8
+    ports:
+      - "3306:3306"
+    restart: always
+    networks:
+      - wifihub
+    environment: 
+      MYSQL_DATABASE: db_springboot_cloud
+      MYSQL_ROOT_PASSWORD: sasa
+  servicio-productos:
+    image: eivan123/servicio-productos:v1
+    restart: always
+    networks:
+      - wifihub
+    depends_on: 
+      - servicio-eureka-server
+  servicio-items:
+    image: eivan123/servicio-items:v1
+    ports:
+      - "8005:8005"
+    restart: always
+    networks:
+      - wifihub
+    depends_on: 
+      - config-server
+      - servicio-eureka-server
+      - servicio-productos
+  servicio-zuul-server:
+    image: eivan123/servicio-zuul-server:v1
+    ports:
+      - "8090:8090"
+    restart: always
+    networks:
+      - wifihub
+    depends_on: 
+      - servicio-eureka-server
+      - servicio-productos
+      - servicio-items
+networks:
+  wifihub:
